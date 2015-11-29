@@ -16,8 +16,7 @@ namespace SerialportDataAnalyzer
 			try
 			{
 				String strConn = @"Provider = Microsoft.Jet.OLEDB.4.0;
-							Data Source=.\Database.mdb;
-							Jet OLEDB:Database Password=shublue";
+							Data Source=.\Database.mdb";
 				//这里采用了低版本的access数据库格式以避免不兼容的坑
 				return new OleDbConnection(strConn);
 			}
