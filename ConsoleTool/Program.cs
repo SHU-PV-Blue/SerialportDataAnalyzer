@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Collections.Generic;
 
 namespace SerialportDataAnalyzer
 {
@@ -15,8 +16,11 @@ namespace SerialportDataAnalyzer
 			{
 				try
 				{
-					MainAnalyzer analyzer = new MainAnalyzer(filePath);
+					List<string> errorLog = new List<string>();
+					MainAnalyzer analyzer = new MainAnalyzer(filePath, errorLog);
 					analyzer.Analy();
+					foreach(var str in errorLog)
+						Console.WriteLine(str);
 				}
 				catch(Exception ex)
 				{
