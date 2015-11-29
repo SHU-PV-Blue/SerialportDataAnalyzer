@@ -15,13 +15,12 @@ namespace SerialportDataAnalyzer
             byte[] bytes = messageQueue.Select(b => b.Key).ToArray();
 
             String message = Transfer.BaToS(bytes);
-            int index = message.IndexOf(returnStr);
-
-            if (index == -1)
-                return false;
-
-            for (int i = index; i < index + returnStr.Length * 2; i++)
-                messageQueue[i] = new KeyValuePair<byte, bool>(messageQueue[i].Key,false);
+            int index = -1;
+            while ((index = message.IndexOf(returnStr, index + 1)) != -1)
+            {
+                for (int i = index / 2; i < (index + returnStr.Length) / 2; i++)
+                    messageQueue[i] = new KeyValuePair<byte, bool>(messageQueue[i].Key, false);
+            }
 
             return true;
 		}
