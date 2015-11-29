@@ -8,9 +8,10 @@ namespace SerialportDataAnalyzer
 {
 	static class QXAnalyzer
 	{
+		static StringBuilder messageString = new StringBuilder();
 		public static bool Analy(DateTime time, List<KeyValuePair<byte, bool>> messgeQueue)
 		{
-			return true;
+				return true;
 		}
 	}
 }

@@ -39,6 +39,7 @@ namespace SerialportDataAnalyzer
 			{
 				List<KeyValuePair<byte, bool>> messgeQueue = new List<KeyValuePair<byte, bool>>();
 				//KeyValuePair<byte, bool>表示一个字节，byte指示字节的值，bool表示字节是否可用，若为false则表示改字节已被取走
+
 				DateTime time;
 				foreach(var line in lines)
 				{
