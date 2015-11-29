@@ -36,7 +36,7 @@ namespace SerialportDataAnalyzer
 			while (message.Contains("03030020"))//固定报头: 地址&长度
 			{
 				index = message.IndexOf("03030020");
-				//Console.WriteLine("0020第一次出现的位置: " + index);
+				//Console.WriteLine("03030020第一次出现的位置: " + index);
 				string dataString = message.Substring(index, stringLenth - 4);			//数据字串
 				byte[] DataByte = SToBa(dataString);						//数据字串对应的数组
 				index += (stringLenth - 4);
