@@ -14,34 +14,33 @@ namespace SerialportDataAnalyzer
 		{
 			string messageString = TransferToString(messgeQueue);	//转化为字符串
 			//Console.WriteLine(messageString);						//显示, 测试用
-
 			int index = 0;//从第几个字符开始匹配, 相应的, 第几个字节应为:index/2
+			if (messgeQueue.Count < 38)
+				return false;
 			//如果检验到匹配, 将匹配的字节数组(Key)对应的Value置为false, 并返回true;
-
-			if (CheckWeather(messageString,out index))
+			if (CheckWeather(messageString, out index))
 			{
 				index /= 2;
 				for (int i = 0; i < byteLength; i++)
-					messgeQueue[i+index] = new KeyValuePair<byte, bool>(messgeQueue[i+index].Key, false);
-					return true;
+					messgeQueue[i + index] = new KeyValuePair<byte, bool>(messgeQueue[i + index].Key, false);
+				return true;
 			}
 			//否则, 返回false;
 			return false;
 		}
 
-		public static bool CheckWeather(string message,out int index)
+		public static bool CheckWeather(string message, out int index)
 		{
 			index = 0;
 			bool flag = false;
 			while (message.Contains("03030020"))//固定报头: 地址&长度
 			{
 				index = message.IndexOf("03030020");
-				//Console.WriteLine("03030020第一次出现的位置: " + index);
 				string dataString = message.Substring(index, stringLenth - 4);			//数据字串
 				byte[] DataByte = SToBa(dataString);						//数据字串对应的数组
 				index += (stringLenth - 4);
 				string checkSubString = message.Substring(index, 4);	//校验字串
-				byte[] CheckByte = SToBa(checkSubString);				//校验字串数组
+				//byte[] CheckByte = SToBa(checkSubString);				//校验字串数组
 				if (CRC16.GetCRC16(DataByte) == checkSubString)
 				{
 					GetDataString(dataString);
@@ -50,7 +49,7 @@ namespace SerialportDataAnalyzer
 					flag = true;
 				}
 				else
-					return false;	
+					return false;
 			}
 			if (flag)
 				return true;
@@ -62,7 +61,8 @@ namespace SerialportDataAnalyzer
 		/// 将数据写入数据库
 		/// </summary>
 		/// <param name="str"></param>
-		private static void GetDataString(string str){
+		private static void GetDataString(string str)
+		{
 			Datastring = str;
 			//将数据写入数据库
 		}
