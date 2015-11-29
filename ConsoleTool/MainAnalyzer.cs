@@ -39,7 +39,7 @@ namespace SerialportDataAnalyzer
 
 			try
 			{
-				List<KeyValuePair<byte, bool>> messgeQueue = new List<KeyValuePair<byte, bool>>();
+				List<KeyValuePair<byte, bool>> messageQueue = new List<KeyValuePair<byte, bool>>();
 				//KeyValuePair<byte, bool>表示一个字节，byte指示字节的值，bool表示字节是否可用，若为false则表示改字节已被取走
 				DateTime time;
 				for(int lineIndex = 0; lineIndex < lines.Count; ++lineIndex)
@@ -56,26 +56,26 @@ namespace SerialportDataAnalyzer
 					byte[] data = Transfer.SToBa(line.Substring(line.IndexOf("###") + "###".Length));
 					foreach(byte b in data)
 					{
-						messgeQueue.Add(new KeyValuePair<byte, bool>(b, true));
+						messageQueue.Add(new KeyValuePair<byte, bool>(b, true));
 					}
-					if (messgeQueue.Count >= 2000)
+					if (messageQueue.Count >= 2000)
 						throw new Exception("消息队列过长!");
 
-					JDQ32Analyzer.Analy(time, messgeQueue);
-					JDQ8Analyzer.Analy(time, messgeQueue);
-					VIAnalyzer.Analy(time, messgeQueue);
-					QXAnalyzer.Analy(time, messgeQueue);
+					JDQ32Analyzer.Analy(time, messageQueue);
+					JDQ8Analyzer.Analy(time, messageQueue);
+					VIAnalyzer.Analy(time, messageQueue);
+					QXAnalyzer.Analy(time, messageQueue);
 					
 					
 					while(true)
 					{
 						//删掉队首已被取走的字节
-						while (messgeQueue.Count != 0 && !messgeQueue[0].Value)
-							messgeQueue.RemoveAt(0);
+						while (messageQueue.Count != 0 && !messageQueue[0].Value)
+							messageQueue.RemoveAt(0);
 						int indexOfFirstNotUse = -1;
-						for (int i = 0; i < messgeQueue.Count; ++i)
+						for (int i = 0; i < messageQueue.Count; ++i)
 						{
-							if (!messgeQueue[i].Value)
+							if (!messageQueue[i].Value)
 							{
 								indexOfFirstNotUse = i;
 								break;
@@ -90,8 +90,8 @@ namespace SerialportDataAnalyzer
 						List<byte> errorData = new List<byte>();
 						for (int i = 0; i < indexOfFirstNotUse; ++i)
 						{
-							errorData.Add(messgeQueue[0].Key);
-							messgeQueue[i] = new KeyValuePair<byte, bool>(messgeQueue[i].Key, false);
+							errorData.Add(messageQueue[0].Key);
+							messageQueue[i] = new KeyValuePair<byte, bool>(messageQueue[i].Key, false);
 						}
 						_errorLog.Add("Error#" + _filePath + "#" + time + "#" + lineIndex + "#" + Transfer.BaToS(errorData.ToArray()));
 					}
