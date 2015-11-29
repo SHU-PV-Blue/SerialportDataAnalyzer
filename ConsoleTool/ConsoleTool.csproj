@@ -45,6 +45,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CRC16.cs" />
+    <Compile Include="DatabaseConnection.cs" />
     <Compile Include="JDQ32Analyzer.cs" />
     <Compile Include="JDQ8Analyzer.cs" />
     <Compile Include="MainAnalyzer.cs" />

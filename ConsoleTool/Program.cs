@@ -1,6 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.OleDb;
+
+using SHUPV.Database.Core;
 
 namespace SerialportDataAnalyzer
 {
@@ -37,6 +41,12 @@ namespace SerialportDataAnalyzer
 			{
 				Console.WriteLine("文件不存在!");
 			}
+
+			//Console.WriteLine("测试Access数据连接");
+			//OleDbConnection dbCon = DatabaseConnection.GetConnection();
+			//dbCon.Open();
+			//DatabaseCore dc = new DatabaseCore(dbCon);
+
 			Console.Read();
 		}
 	}
