@@ -45,14 +45,24 @@ namespace SerialportDataAnalyzer
 				for(int lineIndex = 0; lineIndex < lines.Count; ++lineIndex)
 				{
 					string line = lines[lineIndex];
-					int year = Convert.ToInt32(line.Substring(0, 4));
-					int month = Convert.ToInt32(line.Substring(5, 2));
-					int day = Convert.ToInt32(line.Substring(8, 2));
-					int hour = Convert.ToInt32(line.Substring(11, 2));
-					int minute = Convert.ToInt32(line.Substring(14, 2));
-					int second = Convert.ToInt32(line.Substring(17, 2));
+
+					//对时间的读取解析
+					string dataTimeString = line.Substring(0, line.IndexOf("###"));
+					string[] dataTimeStringSplit = dataTimeString.Split(' ');
+					string dataString = dataTimeStringSplit[0];
+					string timeString = dataTimeStringSplit[1];
+
+					string[] dataStringSplit = dataString.Split('/');
+					string[] timeStringSplit = timeString.Split(':');
+
+					int year = Convert.ToInt32(dataStringSplit[0]);
+					int month = Convert.ToInt32(dataStringSplit[1]);
+					int day = Convert.ToInt32(dataStringSplit[2]);
+					int hour = Convert.ToInt32(timeStringSplit[0]);
+					int minute = Convert.ToInt32(timeStringSplit[1]);
+					int second = Convert.ToInt32(timeStringSplit[2]);
 					time = new DateTime(year, month, day, hour, minute, second);
-					//FIXME:用正则表达式会不会好一点？
+
 					byte[] data = Transfer.SToBa(line.Substring(line.IndexOf("###") + "###".Length));
 					foreach(byte b in data)
 					{
@@ -60,6 +70,12 @@ namespace SerialportDataAnalyzer
 					}
 					if (messageQueue.Count >= 2000)
 						throw new Exception("消息队列过长!");
+
+					//测试代码,测试对时间和数据的读取
+					//Console.WriteLine(time.ToString() + Transfer.BaToS(data));
+					//messageQueue.Clear();
+					//continue;
+					//测试正常
 
 					JDQ32Analyzer.Analy(time, messageQueue);
 					JDQ8Analyzer.Analy(time, messageQueue);
