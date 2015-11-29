@@ -115,7 +115,7 @@ namespace SerialportDataAnalyzer
 			}
 			catch(Exception ex)
 			{
-				throw new Exception(_filePath + "解析失败:" + ex.Message);
+				throw new Exception(_filePath + "解析失败:" + ex.Message, ex);
 			}
 			return true;
 		}

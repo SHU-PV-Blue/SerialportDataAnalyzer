@@ -25,6 +25,12 @@ namespace SerialportDataAnalyzer
 				catch(Exception ex)
 				{
 					Console.WriteLine(ex.Message);
+					Exception exce = ex;
+					while(exce != null)
+					{
+						Console.WriteLine(exce.StackTrace);
+						exce = exce.InnerException;
+					}
 				}
 			}
 			else
