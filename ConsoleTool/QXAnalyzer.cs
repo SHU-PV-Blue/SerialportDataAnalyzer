@@ -44,6 +44,7 @@ namespace SerialportDataAnalyzer
 				if (CRC16.GetCRC16(DataByte) == checkSubString)
 				{
 					GetDataString(dataString);
+					WriteIntoDatabase(DataByte);
 					message.Replace("03030020", "********");
 					index -= (stringLenth - 4);
 					flag = true;
@@ -56,16 +57,34 @@ namespace SerialportDataAnalyzer
 			return false;
 		}
 
-		private static string Datastring;
+		//保存有效数数据字符串
+		private static string Datastring="";
+		private static void GetDataString(string str)
+		{
+			Datastring += str;
+		}
+
 		/// <summary>
 		/// 将数据写入数据库
 		/// </summary>
-		/// <param name="str"></param>
-		private static void GetDataString(string str)
+		/// <param name="dataString"></param>
+		private static void WriteIntoDatabase(byte[] dataByte)
 		{
-			Datastring = str;
-			//将数据写入数据库
+			//1,3,6,7,9,11,12,13,14,15 通道的数据有效
+			int[] index = { 1, 3, 6, 7, 9, 11, 12, 13, 14, 15 };
+			for (int i = 0; i < index.Length; i++)
+			{
+				int k = (index[i] + 1) * 2;//前面两个字内容无效, 所以+2 , 但由于dataByte的下标从零开始, 所以要-1 即: (index[i]-1+2),  每个数据占两个字节, 所以*2
+				int value = dataByte[k]<<8 + dataByte[k+1];//高位乘以16+地位  =  实际值
+				if (value >> 15 == 1)
+				{
+					value = 0x10000 - value;
+				}
+				string sqlString = "insert into ";
+				
+			}
 		}
+		
 
 		/// <summary>
 		/// 将列表转为字符串用于分析
