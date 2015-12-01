@@ -94,8 +94,8 @@ namespace SerialportDataAnalyzer
 				valueString += time[i].ToString() + ",";
 			}
 
-			Console.WriteLine(colString);
-			Console.WriteLine(valueString);
+			//Console.WriteLine(colString);
+			//Console.WriteLine(valueString);
 
 			//添加气象仪数据
 			//1,3,6,7,9,12,13,14,15,16 通道的数据有效
@@ -117,14 +117,14 @@ namespace SerialportDataAnalyzer
 				}
 			}
 
-			Console.WriteLine(colString);
-			foreach (byte i in dataByte)
-				Console.Write(i + " ");
-			Console.WriteLine();
-			Console.WriteLine(valueString);
+			//Console.WriteLine(colString);
+			//foreach (byte i in dataByte)
+			//	Console.Write(i + " ");
+			//Console.WriteLine();
+			//Console.WriteLine(valueString);
 			string insertString = "insert into MeteorologicalData (" + colString + ") values (" + valueString + ")";
-			Console.WriteLine(insertString);
-			Console.ReadLine();
+			//Console.WriteLine(insertString);
+			//Console.ReadLine();
 			OleDbCommand cmd = new OleDbCommand(insertString, oleDbCon);
 			cmd.ExecuteNonQuery();
 		}
