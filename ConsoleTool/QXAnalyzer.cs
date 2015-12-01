@@ -17,7 +17,7 @@ namespace SerialportDataAnalyzer
 			string messageString = TransferToString(messgeQueue);	//转化为字符串
 			//Console.WriteLine(messageString);						//显示, 测试用
 			int index = 0;											//从第几个字符开始匹配, 相应的, 第几个字节应为:index/2
-			if (messgeQueue.Count < 38)
+			if (messgeQueue.Count < byteLength)
 				return false;
 			//如果检验到匹配, 将匹配的字节数组(Key)对应的Value置为false, 并返回true;
 			if (CheckWeather(messageString, out index,time,oleDbCon))
@@ -35,9 +35,11 @@ namespace SerialportDataAnalyzer
 		{
 			index = 0;
 			bool flag = false;
-			while (message.Contains("03030020"))										//固定报头: 地址&长度
+			if (message.Contains("03030020"))										//固定报头: 地址&长度
 			{
 				index = message.IndexOf("03030020");
+				if (message.Length - index < stringLenth)
+					return false;
 				string dataString = message.Substring(index, (stringLenth - 4));			//数据字串
 				byte[] DataByte = SToBa(dataString);									//数据字串对应的数组
 				index += (stringLenth - 4);
@@ -45,9 +47,9 @@ namespace SerialportDataAnalyzer
 				//byte[] CheckByte = SToBa(checkSubString);								//校验字串数组
 				if (CRC16.GetCRC16(DataByte) == checkSubString)
 				{
-					GetDataString(dataString);
-					WriteIntoDatabase(DataByte,time,oleDbCon);
 					message.Replace("03030020", "********");							//将地址码换成等长的*,防止干扰下一次验证
+					GetDataString(dataString);
+					WriteIntoDatabase(DataByte, time, oleDbCon);
 					index -= (stringLenth - 4);
 					flag = true;
 				}
@@ -78,11 +80,12 @@ namespace SerialportDataAnalyzer
 								   "WindSpeed(m/s)", "AirTemperayure", "Rasiation(W/m2)",
 								   "WindDirection", "Humidity(%RH)", "Component1Temperature", 
 								   "Component2Temperature", "Component3Temperature",
-								   "Component4Temperature", "Component5Temperature", "Component6Temperature"
+								   "Component4Temperature", "Component5Temperature"
 							   };
 			//string colString = "Year, Month, Day, Hour, Minute, Second, WindSpeed(m/s), AirTemperayure, Rasiation(W/m2), WindDirection, Humidity(%RH), Component1Temperature, Component2Temperature, Component3Temperature,Component4Temperature, Component5Temperature, Component6Temperature";
 			//string valueString = "";//要插入的语句
 			Dictionary<string, string> QXdataDic = new Dictionary<string, string>();
+			
 			//添加日期数据
 			int year = dateTime.Year;
 			int month = dateTime.Month;
@@ -93,7 +96,7 @@ namespace SerialportDataAnalyzer
 			int[] time = { year, month, day, hour, minute, second };
 			for (int i = 0; i < time.Length; i++)
 			{
-				QXdataDic.Add(colName[i+1], time[i].ToString());			//第一列不添加
+				QXdataDic.Add(colName[i+1], time[i].ToString());						//第一列不添加
 			}
 
 			//添加气象仪数据
@@ -101,13 +104,13 @@ namespace SerialportDataAnalyzer
 			double[] precision = { 0.1, 0.1, 1.0, 1.0, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, };	//每个有效通道数值的精度
 			for (int i = 0; i < index.Length; i++)
 			{
-				int k = (index[i] + 1) * 2;					//前面两个字内容无效, 所以+2 , 但由于dataByte的下标从零开始, 所以要-1 即: (index[i]-1+2),  每个数据占两个字节, 所以*2
+				int k = (index[i] + 1) * 2;							//前面两个字内容无效, 所以+2 , 但由于dataByte的下标从零开始, 所以要-1 即: (index[i]-1+2),  每个数据占两个字节, 所以*2
 				int value = (dataByte[k] << 8) + dataByte[k + 1];	//高位左移8位地位  =  实际值
-				if (value >> 15 == 1)						//如果最高位为1, 则取补,  否则不改变
+				if (value >> 15 == 1)								//如果最高位为1, 则取补,  否则不改变
 				{
 					value = -(0x10000 - value);
 				}
-				double dvalue = value * precision[i];		//取精度
+				double dvalue = value * precision[i];				//取精度
 				QXdataDic.Add(colName[i + 7], dvalue.ToString());
 				
 			}
