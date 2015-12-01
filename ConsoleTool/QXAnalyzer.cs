@@ -38,7 +38,7 @@ namespace SerialportDataAnalyzer
 			while (message.Contains("03030020"))										//固定报头: 地址&长度
 			{
 				index = message.IndexOf("03030020");
-				string dataString = message.Substring(index, stringLenth - 4);			//数据字串
+				string dataString = message.Substring(index, (stringLenth - 4));			//数据字串
 				byte[] DataByte = SToBa(dataString);									//数据字串对应的数组
 				index += (stringLenth - 4);
 				string checkSubString = message.Substring(index, 4);					//校验字串
@@ -47,7 +47,7 @@ namespace SerialportDataAnalyzer
 				{
 					GetDataString(dataString);
 					WriteIntoDatabase(DataByte,time,oleDbCon);
-					message.Replace("03030020", "********");
+					message.Replace("03030020", "********");							//将地址码换成等长的*,防止干扰下一次验证
 					index -= (stringLenth - 4);
 					flag = true;
 				}
@@ -80,9 +80,9 @@ namespace SerialportDataAnalyzer
 								   "Component2Temperature", "Component3Temperature",
 								   "Component4Temperature", "Component5Temperature", "Component6Temperature"
 							   };
-			string colString = "Year, Month, Day, Hour, Minute, Second, WindSpeed(m/s), AirTemperayure, Rasiation(W/m2), WindDirection, Humidity(%RH), Component1Temperature, Component2Temperature, Component3Temperature,Component4Temperature, Component5Temperature, Component6Temperature";
-			string valueString = "";//要插入的语句
-			Dictionary<string, string> dic = new Dictionary<string, string>();
+			//string colString = "Year, Month, Day, Hour, Minute, Second, WindSpeed(m/s), AirTemperayure, Rasiation(W/m2), WindDirection, Humidity(%RH), Component1Temperature, Component2Temperature, Component3Temperature,Component4Temperature, Component5Temperature, Component6Temperature";
+			//string valueString = "";//要插入的语句
+			Dictionary<string, string> QXdataDic = new Dictionary<string, string>();
 			//添加日期数据
 			int year = dateTime.Year;
 			int month = dateTime.Month;
@@ -93,16 +93,12 @@ namespace SerialportDataAnalyzer
 			int[] time = { year, month, day, hour, minute, second };
 			for (int i = 0; i < time.Length; i++)
 			{
-				dic.Add(colName[i], time[i].ToString());
+				QXdataDic.Add(colName[i+1], time[i].ToString());			//第一列不添加
 			}
 
-			Console.WriteLine(colString);
-			Console.WriteLine(valueString);
-
 			//添加气象仪数据
-			//1,3,6,7,9,12,13,14,15,16 通道的数据有效
-			int[] index = { 1, 3, 6, 7, 9, 11, 12, 13, 14, 15 };
-			double[] precision = { 0.1, 0.1, 1.0, 1.0, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, };
+			int[] index = { 1, 3, 6, 7, 9, 11, 12, 13, 14, 15 };						//有效通道
+			double[] precision = { 0.1, 0.1, 1.0, 1.0, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, };	//每个有效通道数值的精度
 			for (int i = 0; i < index.Length; i++)
 			{
 				int k = (index[i] + 1) * 2;					//前面两个字内容无效, 所以+2 , 但由于dataByte的下标从零开始, 所以要-1 即: (index[i]-1+2),  每个数据占两个字节, 所以*2
@@ -111,12 +107,19 @@ namespace SerialportDataAnalyzer
 				{
 					value = -(0x10000 - value);
 				}
-				double dvalue = value * precision[i];
-				dic.Add(colName[i + 6], dvalue.ToString());
+				double dvalue = value * precision[i];		//取精度
+				QXdataDic.Add(colName[i + 7], dvalue.ToString());
 				
 			}
-
-			dataCore.InsertData("MeteorologicalData", dic);
+			try
+			{
+				dataCore.InsertData("MeteorologicalData", QXdataDic);	//插入数据
+			}
+			catch (Exception ex)
+			{
+				throw ex;
+			}
+			
 
 		}
 
