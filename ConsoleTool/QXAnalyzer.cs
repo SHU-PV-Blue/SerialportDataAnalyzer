@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Data.OleDb;
 
 namespace SerialportDataAnalyzer
 {
@@ -10,7 +11,7 @@ namespace SerialportDataAnalyzer
 	{
 		private static int byteLength = 38;		//如果匹配,则有效字段为28字节, 定长
 		private static int stringLenth = 76;	//每个字节可以转化为两个字符
-		public static bool Analy(DateTime time, List<KeyValuePair<byte, bool>> messgeQueue)
+		public static bool Analy(DateTime time, List<KeyValuePair<byte, bool>> messgeQueue, OleDbConnection oleDbCon)
 		{
 			string messageString = TransferToString(messgeQueue);	//转化为字符串
 			//Console.WriteLine(messageString);						//显示, 测试用
@@ -18,7 +19,7 @@ namespace SerialportDataAnalyzer
 			if (messgeQueue.Count < 38)
 				return false;
 			//如果检验到匹配, 将匹配的字节数组(Key)对应的Value置为false, 并返回true;
-			if (CheckWeather(messageString, out index))
+			if (CheckWeather(messageString, out index,time,oleDbCon))
 			{
 				index /= 2;
 				for (int i = 0; i < byteLength; i++)
@@ -29,7 +30,7 @@ namespace SerialportDataAnalyzer
 			return false;
 		}
 
-		public static bool CheckWeather(string message, out int index)
+		public static bool CheckWeather(string message, out int index, DateTime time, OleDbConnection oleDbCon)
 		{
 			index = 0;
 			bool flag = false;
@@ -44,7 +45,7 @@ namespace SerialportDataAnalyzer
 				if (CRC16.GetCRC16(DataByte) == checkSubString)
 				{
 					GetDataString(dataString);
-					WriteIntoDatabase(DataByte);
+					WriteIntoDatabase(DataByte,time,oleDbCon);
 					message.Replace("03030020", "********");
 					index -= (stringLenth - 4);
 					flag = true;
@@ -68,8 +69,32 @@ namespace SerialportDataAnalyzer
 		/// 将数据写入数据库
 		/// </summary>
 		/// <param name="dataString"></param>
-		private static void WriteIntoDatabase(byte[] dataByte)
+		private static void WriteIntoDatabase(byte[] dataByte, DateTime dateTime, OleDbConnection oleDbCon)
 		{
+			//数据库列名
+			string[] colName = { "ID", "Year", "Month", "Day", "Hour", "Minute", "Second",
+								   "WindSpeed(m/s)", "AirTemperayure", "Rasiation(W/m2)",
+								   "WindDirection", "Humidity(%RH)", "Component1Temperature", 
+								   "Component2Temperature", "Component3Temperature",
+								   "Component4Temperature", "Component5Temperature", "Component6Temperature"
+							   };
+
+			//写入日期数据
+			int year = dateTime.Year;
+			int month = dateTime.Month;
+			int day = dateTime.Day;
+			int hour = dateTime.Hour;
+			int minute = dateTime.Minute;
+			int second = dateTime.Second;
+			int[] time = {year,month,day,hour,minute,second};
+			for (int i = 0; i < time.Length; i++)
+			{
+				string sqlString = "insert into MeteorologicalData " + colName[i+1] + "values '" + time[i] + "')";
+				OleDbCommand insertCmd = new OleDbCommand(sqlString,oleDbCon);
+				insertCmd.ExecuteNonQuery();
+			}
+
+			//添加气象仪数据
 			//1,3,6,7,9,11,12,13,14,15 通道的数据有效
 			int[] index = { 1, 3, 6, 7, 9, 11, 12, 13, 14, 15 };
 			for (int i = 0; i < index.Length; i++)
@@ -80,8 +105,9 @@ namespace SerialportDataAnalyzer
 				{
 					value = 0x10000 - value;
 				}
-				string sqlString = "insert into ";
-				
+				string sqlString = "insert into MeteorologicalData " + colName[i+7] +"values '" + value + "')";
+				OleDbCommand insertCmd = new OleDbCommand(sqlString, oleDbCon);
+				insertCmd.ExecuteNonQuery();
 			}
 		}
 		

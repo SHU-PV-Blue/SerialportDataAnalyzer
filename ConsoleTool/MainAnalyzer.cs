@@ -1,6 +1,8 @@
 ﻿using System;
 using System.IO;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.OleDb;
 
 namespace SerialportDataAnalyzer
 {
@@ -42,6 +44,8 @@ namespace SerialportDataAnalyzer
 				List<KeyValuePair<byte, bool>> messageQueue = new List<KeyValuePair<byte, bool>>();
 				//KeyValuePair<byte, bool>表示一个字节，byte指示字节的值，bool表示字节是否可用，若为false则表示改字节已被取走
 				DateTime time;
+				OleDbConnection oleDbCon = DatabaseConnection.GetConnection();
+				oleDbCon.Open();
 				for(int lineIndex = 0; lineIndex < lines.Count; ++lineIndex)
 				{
 					string line = lines[lineIndex];
@@ -79,8 +83,9 @@ namespace SerialportDataAnalyzer
 
 					JDQ32Analyzer.Analy(time, messageQueue);
 					JDQ8Analyzer.Analy(time, messageQueue);
-					VIAnalyzer.Analy(time, messageQueue);
-					QXAnalyzer.Analy(time, messageQueue);
+#warning 请重新实现VIAnalyzer.Analy(),然后删除这个警告，取消注释
+					//VIAnalyzer.Analy(time, messageQueue, oleDbCon);
+					QXAnalyzer.Analy(time, messageQueue, oleDbCon);
 					
 					
 					while(true)
@@ -112,6 +117,7 @@ namespace SerialportDataAnalyzer
 						_errorLog.Add("Error#" + _filePath + "#" + time + "#" + lineIndex + "#" + Transfer.BaToS(errorData.ToArray()));
 					}
 				}
+				oleDbCon.Close();
 			}
 			catch(Exception ex)
 			{
