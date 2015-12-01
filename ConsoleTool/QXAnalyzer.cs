@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Data.OleDb;
+using SHUPV.Database.Core;
 
 namespace SerialportDataAnalyzer
 {
@@ -71,6 +72,7 @@ namespace SerialportDataAnalyzer
 		/// <param name="dataString"></param>
 		private static void WriteIntoDatabase(byte[] dataByte, DateTime dateTime, OleDbConnection oleDbCon)
 		{
+			DatabaseCore dataCore = new DatabaseCore(oleDbCon);
 			//数据库列名
 			string[] colName = { "ID", "Year", "Month", "Day", "Hour", "Minute", "Second",
 								   "WindSpeed(m/s)", "AirTemperayure", "Rasiation(W/m2)",
@@ -80,7 +82,7 @@ namespace SerialportDataAnalyzer
 							   };
 			string colString = "Year, Month, Day, Hour, Minute, Second, WindSpeed(m/s), AirTemperayure, Rasiation(W/m2), WindDirection, Humidity(%RH), Component1Temperature, Component2Temperature, Component3Temperature,Component4Temperature, Component5Temperature, Component6Temperature";
 			string valueString = "";//要插入的语句
-
+			Dictionary<string, string> dic = new Dictionary<string, string>();
 			//添加日期数据
 			int year = dateTime.Year;
 			int month = dateTime.Month;
@@ -91,11 +93,11 @@ namespace SerialportDataAnalyzer
 			int[] time = { year, month, day, hour, minute, second };
 			for (int i = 0; i < time.Length; i++)
 			{
-				valueString += time[i].ToString() + ",";
+				dic.Add(colName[i], time[i].ToString());
 			}
 
-			//Console.WriteLine(colString);
-			//Console.WriteLine(valueString);
+			Console.WriteLine(colString);
+			Console.WriteLine(valueString);
 
 			//添加气象仪数据
 			//1,3,6,7,9,12,13,14,15,16 通道的数据有效
@@ -110,23 +112,75 @@ namespace SerialportDataAnalyzer
 					value = -(0x10000 - value);
 				}
 				double dvalue = value * precision[i];
-				valueString += dvalue.ToString();
-				if (i != index.Length - 1)
-				{
-					valueString += ",";
-				}
+				dic.Add(colName[i + 6], dvalue.ToString());
+				
 			}
+
+			dataCore.InsertData("MeteorologicalData", dic);
+
+		}
+
+		/// <summary>
+		/// 废弃代码, 我选择保留   ...  Orz
+		/// </summary>
+		private static void no()
+		{
+			//数据库列名
+			//string[] colName = { "ID", "Year", "Month", "Day", "Hour", "Minute", "Second",
+			//					   "WindSpeed(m/s)", "AirTemperayure", "Rasiation(W/m2)",
+			//					   "WindDirection", "Humidity(%RH)", "Component1Temperature", 
+			//					   "Component2Temperature", "Component3Temperature",
+			//					   "Component4Temperature", "Component5Temperature", "Component6Temperature"
+			//				   };
+			//string colString = "Year, Month, Day, Hour, Minute, Second, WindSpeed(m/s), AirTemperayure, Rasiation(W/m2), WindDirection, Humidity(%RH), Component1Temperature, Component2Temperature, Component3Temperature,Component4Temperature, Component5Temperature, Component6Temperature";
+			//string valueString = "";//要插入的语句
+
+			//添加日期数据
+			//int year = dateTime.Year;
+			//int month = dateTime.Month;
+			//int day = dateTime.Day;
+			//int hour = dateTime.Hour;
+			//int minute = dateTime.Minute;
+			//int second = dateTime.Second;
+			//int[] time = { year, month, day, hour, minute, second };
+			//for (int i = 0; i < time.Length; i++)
+			//{
+			//	valueString += time[i].ToString() + ",";
+			//}
+
+			//Console.WriteLine(colString);
+			//Console.WriteLine(valueString);
+
+			//添加气象仪数据
+			//1,3,6,7,9,12,13,14,15,16 通道的数据有效
+			//int[] index = { 1, 3, 6, 7, 9, 11, 12, 13, 14, 15 };
+			//double[] precision = { 0.1, 0.1, 1.0, 1.0, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, };
+			//for (int i = 0; i < index.Length; i++)
+			//{
+			//	int k = (index[i] + 1) * 2;					//前面两个字内容无效, 所以+2 , 但由于dataByte的下标从零开始, 所以要-1 即: (index[i]-1+2),  每个数据占两个字节, 所以*2
+			//	int value = (dataByte[k] << 8) + dataByte[k + 1];	//高位左移8位地位  =  实际值
+			//	if (value >> 15 == 1)						//如果最高位为1, 则取补,  否则不改变
+			//	{
+			//		value = -(0x10000 - value);
+			//	}
+			//	double dvalue = value * precision[i];
+			//	valueString += dvalue.ToString();
+			//	if (i != index.Length - 1)
+			//	{
+			//		valueString += ",";
+			//	}
+			//}
 
 			//Console.WriteLine(colString);
 			//foreach (byte i in dataByte)
 			//	Console.Write(i + " ");
 			//Console.WriteLine();
 			//Console.WriteLine(valueString);
-			string insertString = "insert into MeteorologicalData (" + colString + ") values (" + valueString + ")";
+			//string insertString = "insert into MeteorologicalData (" + colString + ") values (" + valueString + ")";
 			//Console.WriteLine(insertString);
 			//Console.ReadLine();
-			OleDbCommand cmd = new OleDbCommand(insertString, oleDbCon);
-			cmd.ExecuteNonQuery();
+			//OleDbCommand cmd = new OleDbCommand(insertString, oleDbCon);
+			//cmd.ExecuteNonQuery();
 		}
 		
 
