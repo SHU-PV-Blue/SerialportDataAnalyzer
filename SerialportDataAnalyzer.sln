@@ -5,6 +5,8 @@ VisualStudioVersion = 12.0.40629.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleTool", "ConsoleTool\ConsoleTool.csproj", "{3D84A7BB-3293-43B3-936E-6F773E8DF333}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "数据查看器", "数据查看器\数据查看器.csproj", "{6539977F-4FC4-4F37-BDC5-9CC95F1EF7B9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{3D84A7BB-3293-43B3-936E-6F773E8DF333}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3D84A7BB-3293-43B3-936E-6F773E8DF333}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3D84A7BB-3293-43B3-936E-6F773E8DF333}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6539977F-4FC4-4F37-BDC5-9CC95F1EF7B9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6539977F-4FC4-4F37-BDC5-9CC95F1EF7B9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6539977F-4FC4-4F37-BDC5-9CC95F1EF7B9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6539977F-4FC4-4F37-BDC5-9CC95F1EF7B9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
