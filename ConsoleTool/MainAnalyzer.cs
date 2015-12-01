@@ -81,6 +81,12 @@ namespace SerialportDataAnalyzer
 					//continue;
 					//测试正常
 
+					//测试代码,测试对解析到哪儿
+					Console.WriteLine("解析到" + time.ToString() + Transfer.BaToS(data));
+					//messageQueue.Clear();
+					//continue;
+					//测试正常
+
 					JDQ32Analyzer.Analy(time, messageQueue);
 					JDQ8Analyzer.Analy(time, messageQueue);
 #warning 请重新实现VIAnalyzer.Analy(),然后删除这个警告，取消注释
