@@ -9,13 +9,13 @@ namespace SerialportDataAnalyzer
 {
 	static class QXAnalyzer
 	{
-		private static int byteLength = 38;		//如果匹配,则有效字段为28字节, 定长
-		private static int stringLenth = 76;	//每个字节可以转化为两个字符
+		private static int byteLength = 38;							//如果匹配,则有效字段为28字节, 定长
+		private static int stringLenth = 76;						//每个字节可以转化为两个字符
 		public static bool Analy(DateTime time, List<KeyValuePair<byte, bool>> messgeQueue, OleDbConnection oleDbCon)
 		{
 			string messageString = TransferToString(messgeQueue);	//转化为字符串
 			//Console.WriteLine(messageString);						//显示, 测试用
-			int index = 0;//从第几个字符开始匹配, 相应的, 第几个字节应为:index/2
+			int index = 0;											//从第几个字符开始匹配, 相应的, 第几个字节应为:index/2
 			if (messgeQueue.Count < 38)
 				return false;
 			//如果检验到匹配, 将匹配的字节数组(Key)对应的Value置为false, 并返回true;
@@ -34,14 +34,14 @@ namespace SerialportDataAnalyzer
 		{
 			index = 0;
 			bool flag = false;
-			while (message.Contains("03030020"))//固定报头: 地址&长度
+			while (message.Contains("03030020"))										//固定报头: 地址&长度
 			{
 				index = message.IndexOf("03030020");
 				string dataString = message.Substring(index, stringLenth - 4);			//数据字串
-				byte[] DataByte = SToBa(dataString);						//数据字串对应的数组
+				byte[] DataByte = SToBa(dataString);									//数据字串对应的数组
 				index += (stringLenth - 4);
-				string checkSubString = message.Substring(index, 4);	//校验字串
-				//byte[] CheckByte = SToBa(checkSubString);				//校验字串数组
+				string checkSubString = message.Substring(index, 4);					//校验字串
+				//byte[] CheckByte = SToBa(checkSubString);								//校验字串数组
 				if (CRC16.GetCRC16(DataByte) == checkSubString)
 				{
 					GetDataString(dataString);
@@ -78,37 +78,55 @@ namespace SerialportDataAnalyzer
 								   "Component2Temperature", "Component3Temperature",
 								   "Component4Temperature", "Component5Temperature", "Component6Temperature"
 							   };
+			string colString = "Year, Month, Day, Hour, Minute, Second, WindSpeed(m/s), AirTemperayure, Rasiation(W/m2), WindDirection, Humidity(%RH), Component1Temperature, Component2Temperature, Component3Temperature,Component4Temperature, Component5Temperature, Component6Temperature";
+			string valueString = "";//要插入的语句
 
-			//写入日期数据
+			//添加日期数据
 			int year = dateTime.Year;
 			int month = dateTime.Month;
 			int day = dateTime.Day;
 			int hour = dateTime.Hour;
 			int minute = dateTime.Minute;
 			int second = dateTime.Second;
-			int[] time = {year,month,day,hour,minute,second};
+			int[] time = { year, month, day, hour, minute, second };
 			for (int i = 0; i < time.Length; i++)
 			{
-				string sqlString = "insert into MeteorologicalData " + colName[i+1] + "values '" + time[i] + "')";
-				OleDbCommand insertCmd = new OleDbCommand(sqlString,oleDbCon);
-				insertCmd.ExecuteNonQuery();
+				valueString += time[i].ToString() + ",";
 			}
 
+			Console.WriteLine(colString);
+			Console.WriteLine(valueString);
+
 			//添加气象仪数据
-			//1,3,6,7,9,11,12,13,14,15 通道的数据有效
+			//1,3,6,7,9,12,13,14,15,16 通道的数据有效
 			int[] index = { 1, 3, 6, 7, 9, 11, 12, 13, 14, 15 };
+			double[] precision = { 0.1, 0.1, 1.0, 1.0, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, };
 			for (int i = 0; i < index.Length; i++)
 			{
-				int k = (index[i] + 1) * 2;//前面两个字内容无效, 所以+2 , 但由于dataByte的下标从零开始, 所以要-1 即: (index[i]-1+2),  每个数据占两个字节, 所以*2
-				int value = dataByte[k]<<8 + dataByte[k+1];//高位乘以16+地位  =  实际值
-				if (value >> 15 == 1)
+				int k = (index[i] + 1) * 2;					//前面两个字内容无效, 所以+2 , 但由于dataByte的下标从零开始, 所以要-1 即: (index[i]-1+2),  每个数据占两个字节, 所以*2
+				int value = (dataByte[k] << 8) + dataByte[k + 1];	//高位左移8位地位  =  实际值
+				if (value >> 15 == 1)						//如果最高位为1, 则取补,  否则不改变
 				{
-					value = 0x10000 - value;
+					value = -(0x10000 - value);
 				}
-				string sqlString = "insert into MeteorologicalData " + colName[i+7] +"values '" + value + "')";
-				OleDbCommand insertCmd = new OleDbCommand(sqlString, oleDbCon);
-				insertCmd.ExecuteNonQuery();
+				double dvalue = value * precision[i];
+				valueString += dvalue.ToString();
+				if (i != index.Length - 1)
+				{
+					valueString += ",";
+				}
 			}
+
+			Console.WriteLine(colString);
+			foreach (byte i in dataByte)
+				Console.Write(i + " ");
+			Console.WriteLine();
+			Console.WriteLine(valueString);
+			string insertString = "insert into MeteorologicalData (" + colString + ") values (" + valueString + ")";
+			Console.WriteLine(insertString);
+			Console.ReadLine();
+			OleDbCommand cmd = new OleDbCommand(insertString, oleDbCon);
+			cmd.ExecuteNonQuery();
 		}
 		
 
