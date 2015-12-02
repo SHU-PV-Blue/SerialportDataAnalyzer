@@ -46,9 +46,9 @@ namespace SerialportDataAnalyzer
 					//测试代码,测试对解析到哪儿
 					Console.WriteLine("解析到" + time.ToString() + Transfer.BaToS(data));
 
-
 					int componentId, azimuth, obliquity;
-					componentAnalyzer.Analy(time, out componentId, out azimuth, out obliquity);
+#warning 我把永华坑了……
+					//componentAnalyzer.Analy(time, messageQueue, out componentId, out azimuth, out obliquity);
 					VIAnalyzer.Analy(time, messageQueue, oleDbCon, componentId, azimuth, obliquity);
 					QXAnalyzer.Analy(time, messageQueue, oleDbCon);
 					
