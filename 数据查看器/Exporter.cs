@@ -47,17 +47,30 @@ namespace 数据查看器
 			Workbooks wbks = excel.Workbooks;
 			Workbook wb = wbks.Add(path + "mb.xlsx");
 
-			Worksheet wsh = wb.Sheets[1];
+			Worksheet wsh = wb.Sheets[3];
 			int index = 2;
 			foreach(DataRow dr in mDt.Rows)
 			{
-				//明天继续写
+				wsh.Cells[index, 1] = dr["Hour"] + ":" + dr["Minute"] + ":" + dr["Second"];
+				wsh.Cells[index, 2] = dr["Hour"];
+				wsh.Cells[index, 3] = dr["WindSpeed(m/s)"];
+				wsh.Cells[index, 4] = dr["AirTemperayure"];
+				wsh.Cells[index, 5] = dr["Rasiation(W/m2)"];
+				wsh.Cells[index, 6] = dr["WindDirection"];
+				wsh.Cells[index, 7] = dr["Humidity(%RH)"];
+
+				DataRow[] result = ivDt.Select("[Hour] = " + dr["Hour"] + " and " + "[Minute] = " + dr["Minute"] + " and " + "[Second] = " + dr["Second"]);
+				wsh.Cells[index, 8] = result[0]["Component1Temperature"];
+				
+				wsh.Cells[index, 9] = dr["Component2Temperature"];
+				wsh.Cells[index, 10] = dr["Component2Temperature"];
+				wsh.Cells[index, 11] = dr["Component3Temperature"];
+				wsh.Cells[index, 12] = dr["Component4Temperature"];
+				wsh.Cells[index, 13] = dr["Component5Temperature"];
+				wsh.Cells[index, 14] = dr["Component6Temperature"];
+
+				index++;
 			}
-
-
-
-
-
 
 			wb.SaveAs(path + _dt.Year + "年" + _dt.Month + "月" + _dt.Day + "日.xlsx");
 			wb.Close();
