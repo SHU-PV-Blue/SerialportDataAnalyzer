@@ -49,8 +49,11 @@ namespace SerialportDataAnalyzer
         /// <param name="componentId">组件号</param>
         /// <param name="azimuth">方位角</param>
         /// <param name="obliquity">倾角</param>
-        public void Analy(DateTime receiveTime,out int componentId, out int azimuth, out int obliquity)
+        public void Analy(DateTime receiveTime,List<KeyValuePair<byte, bool>> messageQueue,out int componentId, out int azimuth, out int obliquity)
         {
+            JDQ8Analy(messageQueue);                             //8路解析
+            JDQ32Analy(messageQueue);                            //32路解析
+
             int index = SearchMatches(receiveTime);
             string sendStr = sendInfo.ElementAt(index).Value;
 
@@ -153,7 +156,7 @@ namespace SerialportDataAnalyzer
         /// 8路继电器解析
         /// </summary>
         /// <param name="messageQueue">数据队列</param>
-        public void JDQ8Analy(List<KeyValuePair<byte, bool>> messageQueue)
+        private void JDQ8Analy(List<KeyValuePair<byte, bool>> messageQueue)
         {
             //!!!!!
             byte[] bytes = messageQueue.Select(b => b.Key).ToArray();
@@ -172,7 +175,7 @@ namespace SerialportDataAnalyzer
         /// 32路继电器解析
         /// </summary>
         /// <param name="messageQueue">数据队列</param>
-        public void JDQ32Analy(List<KeyValuePair<byte, bool>> messageQueue)
+        private void JDQ32Analy(List<KeyValuePair<byte, bool>> messageQueue)
         {
             byte[] bytes = messageQueue.Select(b => b.Key).ToArray();
             String message = Transfer.BaToS(bytes);

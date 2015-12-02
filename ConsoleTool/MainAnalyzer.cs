@@ -48,7 +48,7 @@ namespace SerialportDataAnalyzer
 
 
 					int componentId, azimuth, obliquity;
-					componentAnalyzer.Analy(time, out componentId, out azimuth, out obliquity);
+					componentAnalyzer.Analy(time,messageQueue, out componentId, out azimuth, out obliquity);
 					VIAnalyzer.Analy(time, messageQueue, oleDbCon, componentId, azimuth, obliquity);
 					QXAnalyzer.Analy(time, messageQueue, oleDbCon);
 					
