@@ -11,7 +11,7 @@ namespace SerialportDataAnalyzer
 {
     static class VIAnalyzer
     {
-        public static bool Analy(DateTime time, List<KeyValuePair<byte, bool>> messageQueue, OleDbConnection oleDbCon)
+        public static bool Analy(DateTime time, List<KeyValuePair<byte, bool>> messageQueue, OleDbConnection oleDbCon, int componentId, int azimuth, int obliquity)
         {
             DatabaseCore dataCore = new DatabaseCore(oleDbCon);
             Dictionary<string, string> IVdataDic = new Dictionary<string, string>();
@@ -54,12 +54,15 @@ namespace SerialportDataAnalyzer
                 IVdataDic.Add("Hour", hour.ToString());
                 IVdataDic.Add("Minute", minute.ToString());
                 IVdataDic.Add("Second", second.ToString());
+                IVdataDic.Add("ComponentId", componentId.ToString());
                 IVdataDic.Add("Component1Temperature", Tep.ToString());
                 IVdataDic.Add("OpenCircuitVoltage", Vo.ToString());
                 IVdataDic.Add("ShortCircuitCurrent", Is.ToString());
                 IVdataDic.Add("MaxPowerVoltage", Vm.ToString());
                 IVdataDic.Add("MaxPowerCurrent", Im.ToString());
                 IVdataDic.Add("MaxPower", Pm.ToString());
+                IVdataDic.Add("Azimuth", azimuth.ToString());
+                IVdataDic.Add("Obliquity", obliquity.ToString());
                 IVdataDic.Add("CurrentSeq", byteMatch.Groups[1].Value);
                 IVdataDic.Add("VoltageSeq", byteMatch.Groups[2].Value);
 

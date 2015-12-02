@@ -49,8 +49,7 @@ namespace SerialportDataAnalyzer
 
 					int componentId, azimuth, obliquity;
 					componentAnalyzer.Analy(time, out componentId, out azimuth, out obliquity);
-#warning 修改VI曲线仪解析，接受角度、组件号参数
-					//VIAnalyzer.Analy(time, messageQueue, oleDbCon, componentId, azimuth, obliquity);
+					VIAnalyzer.Analy(time, messageQueue, oleDbCon, componentId, azimuth, obliquity);
 					QXAnalyzer.Analy(time, messageQueue, oleDbCon);
 					
 					while(true)
