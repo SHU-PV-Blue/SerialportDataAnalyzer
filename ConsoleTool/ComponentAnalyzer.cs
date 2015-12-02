@@ -8,8 +8,33 @@ namespace SerialportDataAnalyzer
 {
     class ComponentAnalyzer
     {
-        private const string JDQ8ReturnStr = "020F00000008543E";
-        private const string JDQ32ReturnStr = "010F000000205413";
+        private const string JDQ8ReturnStr = "020F00000008543E";   //8路继电器返回指令
+        private const string JDQ32ReturnStr = "010F000000205413";    //32路继电器返回指令
+        private int initComponentId = 6; //初始组件为6
+        private int initAzimuth = -10;  //组件6初始方位角
+        private int initObliquity = 22;  //组件6初始倾角
+        private string[] componentSendStr = {    //测组件1-5的8路继电器指令
+                    "020F0000000801017F40",
+                    "020F0000000801023F41",
+                    "020F000000080104BF43",
+                    "020F000000080108BF46",
+                    "020F000000080110BF4C"
+                    };
+        private int[,] componentAO = { { 0, 3 }, { 0, 22 }, { 0, 27 }, { 0, 32 }, { 0, 37 } }; //组件1-5的方位角和倾角
+
+        private string[] component6SendStr = { "020F000000080140BF70",   //测组件6的8路继电器指令
+                                                "020F000000080120BF58" };
+
+        private string[] obliquityDec = { "010F0000002004040400008479",    //组件6倾角减少5度指令
+                                         "010F000000200408080000472A" };
+        private string[] obliquityInc = { "010F00000020040101000094B4",    //组件6倾角增加5度指令
+                                            "010F00000020040202000064F0" };
+
+        private string[] azimuthDec = { "010F0000002004000002024429", //组件6方位角增加5度指令
+                                          "010F00000020040000010104D8" };
+        private string[] azimuthInc = { "010F000000200400000404C78B",   //组件6方位角减少5度指令
+                                          "010F000000200400000808C28E"};
+
         private List<KeyValuePair<DateTime, string>> sendInfo;
 
         public ComponentAnalyzer(List<KeyValuePair<DateTime, string>> sendInfo)
@@ -26,10 +51,102 @@ namespace SerialportDataAnalyzer
         /// <param name="obliquity">倾角</param>
         public void Analy(DateTime receiveTime,out int componentId, out int azimuth, out int obliquity)
         {
-            ////////////////////没写完
-            componentId = 0;
-            azimuth = 0;
-            obliquity = 0;
+            int index = SearchMatches(receiveTime);
+            string sendStr = sendInfo.ElementAt(index).Value;
+
+            for (int i = 0; i < 5; i++)
+            {
+                if (sendStr == component6SendStr[i])
+                {
+                    initComponentId = i + 1;
+                    componentId = initComponentId;
+                    azimuth = componentAO[i+1,0];
+                    obliquity = componentAO[i + 1, 1];
+                    return;
+                }
+            }
+
+            if (sendStr == component6SendStr[0] || sendStr == component6SendStr[1])
+            {
+                initComponentId = 6;
+                componentId = initComponentId;
+                azimuth = initAzimuth;
+                obliquity = initObliquity;
+                return;
+            }
+
+            if (sendStr == obliquityDec[0] || sendStr == obliquityDec[1])
+            {
+                initComponentId = 6;
+                componentId = initComponentId;
+                azimuth = initAzimuth;
+                initObliquity -= 5;
+                obliquity = initObliquity;
+                return;
+            }
+
+            if (sendStr == obliquityInc[0] || sendStr == obliquityInc[1])
+            {
+                initComponentId = 6;
+                componentId = initComponentId;
+                azimuth = initAzimuth;
+                initObliquity += 5;
+                obliquity = initObliquity;
+                return;
+            }
+
+            if (sendStr == azimuthDec[0] || sendStr == azimuthDec[1])
+            {
+                initComponentId = 6;
+                componentId = initComponentId;
+                initAzimuth -= 5;
+                azimuth = initAzimuth;
+                obliquity = initObliquity;
+                return;
+            }
+
+            if (sendStr == azimuthInc[0] || sendStr == azimuthInc[1])
+            {
+                initComponentId = 6;
+                componentId = initComponentId;
+                initAzimuth += 5;
+                azimuth = initAzimuth;
+                obliquity = initObliquity;
+                return;
+            }
+            componentId = initComponentId;
+            azimuth = initAzimuth;
+            obliquity = initObliquity;
+        }
+
+        /// <summary>
+        /// 找到最接近时间的下标
+        /// </summary>
+        /// <param name="time"></param>
+        /// <returns></returns>
+        private int SearchMatches(DateTime time)
+        {
+            int low = 0,high = sendInfo.Count() - 1;
+            int mid;
+            while (low + 1 < high)
+            {
+                mid = (low + high) / 2;
+                if (sendInfo.ElementAt(mid).Key.CompareTo(time) > 0)
+                {
+                    high = mid - 1;
+                }
+                else
+                {
+                    low = mid + 1;
+                }
+            }
+            int t1,t2;
+            t1 = Math.Abs(((TimeSpan)(time - sendInfo.ElementAt(low).Key)).Seconds);
+            t2 = Math.Abs(((TimeSpan)(time - sendInfo.ElementAt(high).Key)).Seconds);
+            if (t1 < t2)
+                return low;
+            else
+                return high;
         }
 
         /// <summary>
