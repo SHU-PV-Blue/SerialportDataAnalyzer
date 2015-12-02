@@ -54,9 +54,9 @@ namespace SerialportDataAnalyzer
             int index = SearchMatches(receiveTime);
             string sendStr = sendInfo.ElementAt(index).Value;
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < 5; i++)                           //1-5号组件
             {
-                if (sendStr == component6SendStr[i])
+                if (sendStr == componentSendStr[i])
                 {
                     initComponentId = i + 1;
                     componentId = initComponentId;
@@ -66,7 +66,7 @@ namespace SerialportDataAnalyzer
                 }
             }
 
-            if (sendStr == component6SendStr[0] || sendStr == component6SendStr[1])
+            if (sendStr == component6SendStr[0] || sendStr == component6SendStr[1])   //如果是组件6的8路继电器指令
             {
                 initComponentId = 6;
                 componentId = initComponentId;
@@ -75,7 +75,7 @@ namespace SerialportDataAnalyzer
                 return;
             }
 
-            if (sendStr == obliquityDec[0] || sendStr == obliquityDec[1])
+            if (sendStr == obliquityDec[0] || sendStr == obliquityDec[1])  //如果是组件6倾角减少5度指令
             {
                 initComponentId = 6;
                 componentId = initComponentId;
@@ -85,7 +85,7 @@ namespace SerialportDataAnalyzer
                 return;
             }
 
-            if (sendStr == obliquityInc[0] || sendStr == obliquityInc[1])
+            if (sendStr == obliquityInc[0] || sendStr == obliquityInc[1])  //如果是组件6倾角增加5度指令
             {
                 initComponentId = 6;
                 componentId = initComponentId;
@@ -95,7 +95,7 @@ namespace SerialportDataAnalyzer
                 return;
             }
 
-            if (sendStr == azimuthDec[0] || sendStr == azimuthDec[1])
+            if (sendStr == azimuthDec[0] || sendStr == azimuthDec[1])    //如果是组件6方位角减少5度指令
             {
                 initComponentId = 6;
                 componentId = initComponentId;
@@ -105,7 +105,7 @@ namespace SerialportDataAnalyzer
                 return;
             }
 
-            if (sendStr == azimuthInc[0] || sendStr == azimuthInc[1])
+            if (sendStr == azimuthInc[0] || sendStr == azimuthInc[1])   //如果是组件6方位角增加5度指令
             {
                 initComponentId = 6;
                 componentId = initComponentId;
@@ -120,15 +120,15 @@ namespace SerialportDataAnalyzer
         }
 
         /// <summary>
-        /// 找到最接近时间的下标
+        /// 找到最接近所给时间的下标
         /// </summary>
-        /// <param name="time"></param>
+        /// <param name="time">DateTime 参数</param>
         /// <returns></returns>
         private int SearchMatches(DateTime time)
         {
             int low = 0,high = sendInfo.Count() - 1;
             int mid;
-            while (low + 1 < high)
+            while (low + 1 < high)                    //二分查找
             {
                 mid = (low + high) / 2;
                 if (sendInfo.ElementAt(mid).Key.CompareTo(time) > 0)
