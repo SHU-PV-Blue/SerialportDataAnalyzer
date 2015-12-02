@@ -88,9 +88,10 @@ namespace SerialportDataAnalyzer
 					//continue;
 					//测试正常
 
-					JDQ32Analyzer.Analy(time, messageQueue);
-					JDQ8Analyzer.Analy(time, messageQueue);
-					VIAnalyzer.Analy(time, messageQueue, oleDbCon);
+#warning 等新的继电器数据解析类完成
+					//JDQ32Analyzer.Analy(time, messageQueue);
+					//JDQ8Analyzer.Analy(time, messageQueue);
+                    VIAnalyzer.Analy(time, messageQueue, oleDbCon);
 					QXAnalyzer.Analy(time, messageQueue, oleDbCon);
 					
 					
