@@ -8,92 +8,50 @@ namespace SerialportDataAnalyzer
 {
 	class MainAnalyzer
 	{
-		string _filePath;
+		string _sendFilePath;
+		string _receiveFilePath;
 		List<string> _errorLog;
-		public MainAnalyzer(string filePath, List<string> errorLog)
+		public MainAnalyzer(string sendFilePath, string receiveFilePath, List<string> errorLog)
 		{
-			_filePath = filePath;
+			_sendFilePath = sendFilePath;
+			_receiveFilePath = receiveFilePath;
 			_errorLog = errorLog;
 		}
 		public bool Analy()
 		{
-			StreamReader fileIn;
-			List<string> lines = new List<string>();
-			try
-			{
-				fileIn = new StreamReader(_filePath);
-				while(!fileIn.EndOfStream)
-				{
-					string newLine = fileIn.ReadLine();
-					if(String.IsNullOrEmpty(newLine) && fileIn.EndOfStream)
-						break;
-					//FIXME: 这里最好用正则表达式检查一下newLine
-					lines.Add(newLine);
-				}
-				fileIn.Close();
-				if (lines.Count == 0)
-					throw new Exception("只读到0行数据");
-			}
-			catch(Exception ex)
-			{
-				throw new Exception(_filePath + "读取失败:" + ex.Message);
-			}
 
+			List<KeyValuePair<DateTime, string>> receiveLines = LoadLines(_receiveFilePath);
+			List<KeyValuePair<DateTime, string>> sendLines = LoadLines(_sendFilePath);
 			try
 			{
 				List<KeyValuePair<byte, bool>> messageQueue = new List<KeyValuePair<byte, bool>>();
 				//KeyValuePair<byte, bool>表示一个字节，byte指示字节的值，bool表示字节是否可用，若为false则表示改字节已被取走
-				DateTime time;
+
+				ComponentAnalyzer componentAnalyzer = new ComponentAnalyzer(sendLines);
+
 				OleDbConnection oleDbCon = DatabaseConnection.GetConnection();
 				oleDbCon.Open();
-				for(int lineIndex = 0; lineIndex < lines.Count; ++lineIndex)
+				for(int lineIndex = 0; lineIndex < receiveLines.Count; ++lineIndex)
 				{
-					string line = lines[lineIndex];
+					string line = receiveLines[lineIndex].Value;
+					DateTime time = receiveLines[lineIndex].Key;
+					byte[] data = Transfer.SToBa(line);
 
-					//对时间的读取解析
-					string dataTimeString = line.Substring(0, line.IndexOf("###"));
-					string[] dataTimeStringSplit = dataTimeString.Split(' ');
-					string dataString = dataTimeStringSplit[0];
-					string timeString = dataTimeStringSplit[1];
-
-					string[] dataStringSplit = dataString.Split('/');
-					string[] timeStringSplit = timeString.Split(':');
-
-					int year = Convert.ToInt32(dataStringSplit[0]);
-					int month = Convert.ToInt32(dataStringSplit[1]);
-					int day = Convert.ToInt32(dataStringSplit[2]);
-					int hour = Convert.ToInt32(timeStringSplit[0]);
-					int minute = Convert.ToInt32(timeStringSplit[1]);
-					int second = Convert.ToInt32(timeStringSplit[2]);
-					time = new DateTime(year, month, day, hour, minute, second);
-
-					byte[] data = Transfer.SToBa(line.Substring(line.IndexOf("###") + "###".Length));
 					foreach(byte b in data)
-					{
 						messageQueue.Add(new KeyValuePair<byte, bool>(b, true));
-					}
+
 					if (messageQueue.Count >= 2000)
 						throw new Exception("消息队列过长!");
 
-					//测试代码,测试对时间和数据的读取
-					//Console.WriteLine(time.ToString() + Transfer.BaToS(data));
-					//messageQueue.Clear();
-					//continue;
-					//测试正常
-
-
 					//测试代码,测试对解析到哪儿
 					Console.WriteLine("解析到" + time.ToString() + Transfer.BaToS(data));
-					//messageQueue.Clear();
-					//continue;
-					//测试正常
 
-#warning 等新的继电器数据解析类完成
-					//JDQ32Analyzer.Analy(time, messageQueue);
-					//JDQ8Analyzer.Analy(time, messageQueue);
+
+					int componentId, azimuth, obliquity;
+					componentAnalyzer.Analy(time, out componentId, out azimuth, out obliquity);
+#warning VI曲线仪解析逐步接收角度、组件号参数
                     VIAnalyzer.Analy(time, messageQueue, oleDbCon);
 					QXAnalyzer.Analy(time, messageQueue, oleDbCon);
-					
 					
 					while(true)
 					{
@@ -121,16 +79,58 @@ namespace SerialportDataAnalyzer
 							errorData.Add(messageQueue[0].Key);
 							messageQueue[i] = new KeyValuePair<byte, bool>(messageQueue[i].Key, false);
 						}
-						_errorLog.Add("Error#" + _filePath + "#" + time + "#" + lineIndex + "#" + Transfer.BaToS(errorData.ToArray()));
+						_errorLog.Add("Error#" + _receiveFilePath + "#" + time + "#" + lineIndex + "#" + Transfer.BaToS(errorData.ToArray()));
 					}
 				}
 				oleDbCon.Close();
 			}
 			catch(Exception ex)
 			{
-				throw new Exception(_filePath + "解析失败:" + ex.Message, ex);
+				throw new Exception(_receiveFilePath + "解析失败:" + ex.Message, ex);
 			}
 			return true;
+		}
+
+		private List<KeyValuePair<DateTime, string>> LoadLines(string filePath)
+		{
+			
+			List<KeyValuePair<DateTime, string>> lines = new List<KeyValuePair<DateTime, string>>();
+			try
+			{
+				StreamReader fileIn = new StreamReader(filePath);
+				while(!fileIn.EndOfStream)
+				{
+					string newLine = fileIn.ReadLine();
+					if(String.IsNullOrEmpty(newLine) && fileIn.EndOfStream)
+						break;
+
+					string dataTimeString = newLine.Substring(0, newLine.IndexOf("###"));
+					string[] dataTimeStringSplit = dataTimeString.Split(' ');
+					string dataString = dataTimeStringSplit[0];
+					string timeString = dataTimeStringSplit[1];
+
+					string[] dataStringSplit = dataString.Split('/');
+					string[] timeStringSplit = timeString.Split(':');
+
+					int year = Convert.ToInt32(dataStringSplit[0]);
+					int month = Convert.ToInt32(dataStringSplit[1]);
+					int day = Convert.ToInt32(dataStringSplit[2]);
+					int hour = Convert.ToInt32(timeStringSplit[0]);
+					int minute = Convert.ToInt32(timeStringSplit[1]);
+					int second = Convert.ToInt32(timeStringSplit[2]);
+
+					lines.Add(new KeyValuePair<DateTime, string>(new DateTime(year, month, day, hour, minute, second),
+									(newLine.Substring(newLine.IndexOf("###") + "###".Length))));
+				}
+				fileIn.Close();
+				if (lines.Count == 0)
+					throw new Exception("只读到0行数据:" + filePath);
+			}
+			catch(Exception ex)
+			{
+				throw new Exception(filePath + "读取失败:" + ex.Message, ex);
+			}
+			return lines;
 		}
 	}
 }
