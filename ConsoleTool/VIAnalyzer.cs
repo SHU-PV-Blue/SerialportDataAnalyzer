@@ -17,7 +17,7 @@ namespace SerialportDataAnalyzer
             Dictionary<string, string> IVdataDic = new Dictionary<string, string>();
 
             byte[] byteArray = messageQueue.Select(b => b.Key).ToArray();
-            string byteStr = System.Text.Encoding.Default.GetString(byteArray);
+            string byteStr = Transfer.BaToS(byteArray);
 
             string Regex = @"AA0012019001([A-Za-z0-9_]{800})CC33C33CAA0012029090([A-Za-z0-9_]{800})CC33C33CAA0012091100([A-Za-z0-9_]{34})CC33C33C";
             Regex Re = new Regex(Regex);
