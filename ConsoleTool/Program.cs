@@ -31,6 +31,9 @@ namespace SerialportDataAnalyzer
 					analyzer.Analy();
 					foreach(var str in errorLog)
 						Console.WriteLine(str);
+					StreamWriter errorLogFile = new StreamWriter("errorLog.txt", false);
+					foreach(var str in errorLog)
+						errorLogFile.WriteLine(str);
 				}
 				catch(Exception ex)
 				{

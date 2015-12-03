@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
+using System.Linq;
 
 namespace SerialportDataAnalyzer
 {
@@ -44,7 +45,8 @@ namespace SerialportDataAnalyzer
 						throw new Exception("消息队列过长!");
 
 					//测试代码,测试对解析到哪儿
-					Console.WriteLine("解析到" + time.ToString() + Transfer.BaToS(data));
+					Console.Write("完成" + (lineIndex * 100 / receiveLines.Count) + "%");
+					Console.WriteLine("解析到" + time.ToString());
 
 					int componentId, azimuth, obliquity;
 

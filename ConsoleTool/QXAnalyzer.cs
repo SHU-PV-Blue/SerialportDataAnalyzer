@@ -78,9 +78,9 @@ namespace SerialportDataAnalyzer
 			//数据库列名
 			string[] colName = { "ID", "Year", "Month", "Day", "Hour", "Minute", "Second",
 								   "WindSpeed(m/s)", "AirTemperayure", "Rasiation(W/m2)",
-								   "WindDirection", "Humidity(%RH)", "Component1Temperature", 
+								   "WindDirection", "Humidity(%RH)",  
 								   "Component2Temperature", "Component3Temperature",
-								   "Component4Temperature", "Component5Temperature"
+								   "Component4Temperature", "Component5Temperature","Component6Temperature",
 							   };
 			//string colString = "Year, Month, Day, Hour, Minute, Second, WindSpeed(m/s), AirTemperayure, Rasiation(W/m2), WindDirection, Humidity(%RH), Component1Temperature, Component2Temperature, Component3Temperature,Component4Temperature, Component5Temperature, Component6Temperature";
 			//string valueString = "";//要插入的语句

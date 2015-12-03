@@ -63,8 +63,8 @@ namespace SerialportDataAnalyzer
                 {
                     initComponentId = i + 1;
                     componentId = initComponentId;
-                    azimuth = componentAO[i+1,0];
-                    obliquity = componentAO[i + 1, 1];
+                    azimuth = componentAO[i,0];
+                    obliquity = componentAO[i, 1];
                     return;
                 }
             }
