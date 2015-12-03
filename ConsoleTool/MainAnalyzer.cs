@@ -78,10 +78,10 @@ namespace SerialportDataAnalyzer
 						List<byte> errorData = new List<byte>();
 						for (int i = 0; i < indexOfFirstNotUse; ++i)
 						{
-							errorData.Add(messageQueue[0].Key);
+							errorData.Add(messageQueue[i].Key);
 							messageQueue[i] = new KeyValuePair<byte, bool>(messageQueue[i].Key, false);
 						}
-						_errorLog.Add("Error#" + _receiveFilePath + "#" + time + "#" + lineIndex + "#" + Transfer.BaToS(errorData.ToArray()));
+						_errorLog.Add("Error#" + time + "#" + lineIndex + "#" + Transfer.BaToS(errorData.ToArray()));
 					}
 				}
 				oleDbCon.Close();
