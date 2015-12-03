@@ -51,6 +51,9 @@ namespace SerialportDataAnalyzer
 					int componentId, azimuth, obliquity;
 
 					componentAnalyzer.Analy(time,messageQueue, out componentId, out azimuth, out obliquity);
+					//测试代码,测试componentAnalyzer.Analy()的返回
+					Console.WriteLine(componentId + " " + azimuth + " " + obliquity);
+
 
 					VIAnalyzer.Analy(time, messageQueue, oleDbCon, componentId, azimuth, obliquity);
 					QXAnalyzer.Analy(time, messageQueue, oleDbCon);
