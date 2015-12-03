@@ -11,6 +11,8 @@ namespace SerialportDataAnalyzer
         private const string JDQ8ReturnStr = "020F00000008543E";   //8路继电器返回指令
         private const string JDQ32ReturnStr = "010F000000205413";    //32路继电器返回指令
         private int initComponentId = 6; //初始组件为6
+		private DateTime nowTime;//组件的状态保持在nowTime这个时间点
+		private int nextIndex = 0;//下一条没发送的指令
         private int initAzimuth = -10;  //组件6初始方位角
         private int initObliquity = 22;  //组件6初始倾角
         private string[] componentSendStr = {    //测组件1-5的8路继电器指令
@@ -30,9 +32,9 @@ namespace SerialportDataAnalyzer
         private string[] obliquityInc = { "010F00000020040101000094B4",    //组件6倾角增加5度指令
                                             "010F00000020040202000064F0" };
 
-        private string[] azimuthDec = { "010F0000002004000002024429", //组件6方位角增加5度指令
+        private string[] azimuthInc = { "010F0000002004000002024429", //组件6方位角增加5度指令
                                           "010F00000020040000010104D8" };
-        private string[] azimuthInc = { "010F000000200400000404C78B",   //组件6方位角减少5度指令
+        private string[] azimuthDec = { "010F000000200400000404C78B",   //组件6方位角减少5度指令
                                           "010F000000200400000808C28E"};
 
         private List<KeyValuePair<DateTime, string>> sendInfo;
@@ -40,6 +42,7 @@ namespace SerialportDataAnalyzer
         public ComponentAnalyzer(List<KeyValuePair<DateTime, string>> sendInfo)
         {
             this.sendInfo = sendInfo;
+			nowTime = sendInfo[0].Key;
         }
 
         /// <summary>
@@ -54,72 +57,61 @@ namespace SerialportDataAnalyzer
             JDQ8Analy(messageQueue);                             //8路解析
             JDQ32Analy(messageQueue);                            //32路解析
 
-            int index = SearchMatches(receiveTime);
-            string sendStr = sendInfo.ElementAt(index).Value;
+            while(nextIndex < sendInfo.Count && sendInfo[nextIndex].Key < receiveTime)
+			{
+				string sendStr = sendInfo.ElementAt(nextIndex).Value;
 
-            for (int i = 0; i < 5; i++)                           //1-5号组件
-            {
-                if (sendStr == componentSendStr[i])
-                {
-                    initComponentId = i + 1;
-                    componentId = initComponentId;
-                    azimuth = componentAO[i,0];
-                    obliquity = componentAO[i, 1];
-                    return;
-                }
-            }
+				for (int i = 0; i < 5; i++)                           //1-5号组件
+				{
+					if (sendStr == componentSendStr[i])
+					{
+						initComponentId = i + 1;
+						componentId = initComponentId;
+						break;
+						//azimuth = componentAO[i, 0];
+						//obliquity = componentAO[i, 1];
+						//return;
+					}
+				}
 
-            if (sendStr == component6SendStr[0] || sendStr == component6SendStr[1])   //如果是组件6的8路继电器指令
-            {
-                initComponentId = 6;
-                componentId = initComponentId;
-                azimuth = initAzimuth;
-                obliquity = initObliquity;
-                return;
-            }
+				if (sendStr == component6SendStr[0] || sendStr == component6SendStr[1])   //如果是组件6的8路继电器指令
+				{
+					initComponentId = 6;
+				}
 
-            if (sendStr == obliquityDec[0] || sendStr == obliquityDec[1])  //如果是组件6倾角减少5度指令
-            {
-                initComponentId = 6;
-                componentId = initComponentId;
-                azimuth = initAzimuth;
-                initObliquity -= 5;
-                obliquity = initObliquity;
-                return;
-            }
+				if (sendStr == obliquityDec[0] || sendStr == obliquityDec[1])  //如果是组件6倾角减少5度指令
+				{
+					initObliquity -= 5;
+				}
 
-            if (sendStr == obliquityInc[0] || sendStr == obliquityInc[1])  //如果是组件6倾角增加5度指令
-            {
-                initComponentId = 6;
-                componentId = initComponentId;
-                azimuth = initAzimuth;
-                initObliquity += 5;
-                obliquity = initObliquity;
-                return;
-            }
+				if (sendStr == obliquityInc[0] || sendStr == obliquityInc[1])  //如果是组件6倾角增加5度指令
+				{
+					initObliquity += 5;
+				}
 
-            if (sendStr == azimuthDec[0] || sendStr == azimuthDec[1])    //如果是组件6方位角减少5度指令
-            {
-                initComponentId = 6;
-                componentId = initComponentId;
-                initAzimuth -= 5;
-                azimuth = initAzimuth;
-                obliquity = initObliquity;
-                return;
-            }
+				if (sendStr == azimuthDec[0] || sendStr == azimuthDec[1])    //如果是组件6方位角减少5度指令
+				{
+					initAzimuth -= 5;
+				}
 
-            if (sendStr == azimuthInc[0] || sendStr == azimuthInc[1])   //如果是组件6方位角增加5度指令
-            {
-                initComponentId = 6;
-                componentId = initComponentId;
-                initAzimuth += 5;
-                azimuth = initAzimuth;
-                obliquity = initObliquity;
-                return;
-            }
+				if (sendStr == azimuthInc[0] || sendStr == azimuthInc[1])   //如果是组件6方位角增加5度指令
+				{
+					initAzimuth += 5;
+				}
+				++nextIndex;
+			}
+ 
             componentId = initComponentId;
-            azimuth = initAzimuth;
-            obliquity = initObliquity;
+			if(initComponentId == 6)
+			{
+				azimuth = initAzimuth;
+				obliquity = initObliquity;
+			}
+			else
+			{
+				azimuth = componentAO[initComponentId - 1, 0];
+				obliquity = componentAO[initComponentId - 1, 1];
+			}
         }
 
         /// <summary>
