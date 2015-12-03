@@ -25,6 +25,7 @@ namespace 数据查看器
 		private void btnGetData_Click(object sender, EventArgs e)
 		{
 			Exporter ex = new Exporter(dtpDate.Value);
+			ex.Export();
 		}
 	}
 }

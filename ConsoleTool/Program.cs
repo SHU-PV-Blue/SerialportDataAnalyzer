@@ -13,15 +13,21 @@ namespace SerialportDataAnalyzer
 		static void Main(string[] args)
 		{
 			Console.Title = "串口数据解析器控制台版";
-			Console.WriteLine("解析器已启动，请输入完整文件名：");
-			string filePath;
-			filePath = Console.ReadLine();
-			if((new FileInfo(filePath)).Exists)
+
+			Console.WriteLine("解析器已启动，请输入完整发送文件名：");
+			string sendFilePath;
+			sendFilePath = Console.ReadLine();
+
+			Console.WriteLine("解析器已启动，请输入完整接收文件名：");
+			string receiveFilePath;
+			receiveFilePath = Console.ReadLine();
+
+			if ((new FileInfo(sendFilePath)).Exists && (new FileInfo(receiveFilePath)).Exists)
 			{
 				try
 				{
 					List<string> errorLog = new List<string>();
-					MainAnalyzer analyzer = new MainAnalyzer(filePath, errorLog);
+					MainAnalyzer analyzer = new MainAnalyzer(sendFilePath,receiveFilePath, errorLog);
 					analyzer.Analy();
 					foreach(var str in errorLog)
 						Console.WriteLine(str);
@@ -41,11 +47,6 @@ namespace SerialportDataAnalyzer
 			{
 				Console.WriteLine("文件不存在!");
 			}
-
-			//Console.WriteLine("测试Access数据连接");
-			//OleDbConnection dbCon = DatabaseConnection.GetConnection();
-			//dbCon.Open();
-			//DatabaseCore dc = new DatabaseCore(dbCon);
 
 			Console.Read();
 		}
