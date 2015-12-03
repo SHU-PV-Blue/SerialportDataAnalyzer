@@ -47,34 +47,155 @@ namespace 数据查看器
 			Workbooks wbks = excel.Workbooks;
 			Workbook wb = wbks.Add(path + "mb.xlsx");
 
-			Worksheet wsh = wb.Sheets[3];
-			int index = 2;
+			int row = 2;
 			foreach(DataRow dr in mDt.Rows)
 			{
-				wsh.Cells[index, 1] = dr["Hour"] + ":" + dr["Minute"] + ":" + dr["Second"];
-				wsh.Cells[index, 2] = dr["Hour"];
-				wsh.Cells[index, 3] = dr["WindSpeed(m/s)"];
-				wsh.Cells[index, 4] = dr["AirTemperayure"];
-				wsh.Cells[index, 5] = dr["Rasiation(W/m2)"];
-				wsh.Cells[index, 6] = dr["WindDirection"];
-				wsh.Cells[index, 7] = dr["Humidity(%RH)"];
+				Worksheet wsh = wb.Sheets[3];
+				int col = 1;
+				wsh.Cells[row, col++] = dr["Hour"] + ":" + dr["Minute"] + ":" + dr["Second"];
+				wsh.Cells[row, col++] = dr["WindSpeed(m/s)"];
+				wsh.Cells[row, col++] = dr["AirTemperayure"];
+				wsh.Cells[row, col++] = dr["Rasiation(W/m2)"];
+				wsh.Cells[row, col++] = dr["WindDirection"];
+				wsh.Cells[row, col++] = dr["Humidity(%RH)"];
 
 				DataRow[] result = ivDt.Select("[Hour] = " + dr["Hour"] + " and " + "[Minute] = " + dr["Minute"] + " and " + "[Second] = " + dr["Second"]);
-				wsh.Cells[index, 8] = result[0]["Component1Temperature"];
-				
-				wsh.Cells[index, 9] = dr["Component2Temperature"];
-				wsh.Cells[index, 10] = dr["Component2Temperature"];
-				wsh.Cells[index, 11] = dr["Component3Temperature"];
-				wsh.Cells[index, 12] = dr["Component4Temperature"];
-				wsh.Cells[index, 13] = dr["Component5Temperature"];
-				wsh.Cells[index, 14] = dr["Component6Temperature"];
+				wsh.Cells[row, col++] = result[0]["Component1Temperature"];
 
-				index++;
+				wsh.Cells[row, col++] = dr["Component2Temperature"];
+				wsh.Cells[row, col++] = dr["Component3Temperature"];
+				wsh.Cells[row, col++] = dr["Component4Temperature"];
+				wsh.Cells[row, col++] = dr["Component5Temperature"];
+				wsh.Cells[row, col++] = dr["Component6Temperature"];
+
+				row++;
+			}
+
+			int sheet1Row = 4;
+			int sheet2Row = 3;
+			foreach (DataRow dr in ivDt.Rows)
+			{
+				int sheet;
+				int col;
+				GetLocation((int)dr["ComponentId"], (int)dr["Azimuth"], (int)dr["Obliquity"], out sheet, out col);
+				Worksheet wsh = wb.Sheets[sheet];
+				if(sheet == 1)
+				{
+					wsh.Cells[sheet1Row, 1] = dr["Hour"] + ":" + dr["Minute"] + ":" + dr["Second"];
+					wsh.Cells[sheet1Row, col++] = dr["OpenCircuitVoltage"];
+					wsh.Cells[sheet1Row, col++] = dr["ShortCircuitCurrent"];
+					wsh.Cells[sheet1Row, col++] = dr["MaxPowerVoltage"];
+					wsh.Cells[sheet1Row, col++] = dr["MaxPowerCurrent"];
+					wsh.Cells[sheet1Row, col++] = dr["MaxPower"];
+					++sheet1Row;
+				}
+				if (sheet == 2)
+				{
+					wsh.Cells[sheet2Row, 1] = dr["Hour"] + ":" + dr["Minute"] + ":" + dr["Second"];
+					wsh.Cells[sheet2Row, col++] = dr["OpenCircuitVoltage"];
+					wsh.Cells[sheet2Row, col++] = dr["ShortCircuitCurrent"];
+					wsh.Cells[sheet2Row, col++] = dr["MaxPowerVoltage"];
+					wsh.Cells[sheet2Row, col++] = dr["MaxPowerCurrent"];
+					wsh.Cells[sheet2Row, col++] = dr["MaxPower"];
+					++sheet2Row;
+				}
 			}
 
 			wb.SaveAs(path + _dt.Year + "年" + _dt.Month + "月" + _dt.Day + "日.xlsx");
 			wb.Close();
+			wbks.Close();
 			return true;
+		}
+
+		private void GetLocation(int componentId,int azimuth, int obliquity, out int sheet, out int startCol)
+		{
+			switch(componentId)
+			{
+				case 1:
+				case 2:
+				case 3:
+				case 4:
+				case 5:
+				{
+					sheet = 2;
+					break;
+				}
+				case 6:
+				{
+					sheet = 1;
+					break;
+				}
+				default:
+				{
+					throw new Exception("componentId 参数不合法:" + componentId);
+				}
+			}
+			if(sheet == 1)//是6号组件
+			{
+				int index = 2;
+				switch(azimuth)
+				{
+					case -10:
+						index += 20 * 0;
+						break;
+					case -5:
+						index += 20 * 1;
+						break;
+					case 0:
+						index += 20 * 2;
+						break;
+					case 5:
+						index += 20 * 3;
+						break;
+					default:
+						throw new Exception("azimuth 参数不合法:" + azimuth);
+				}
+				if (azimuth == -10 || azimuth == 0)
+				{
+					switch (obliquity)
+					{
+						case 22:
+							index += 0 * 5;
+							break;
+						case 27:
+							index += 1 * 5;
+							break;
+						case 32:
+							index += 2 * 5;
+							break;
+						case 37:
+							index += 3 * 5;
+							break;
+						default:
+							throw new Exception("obliquity 参数不合法:" + obliquity);
+					}
+				}
+				else
+				{
+					switch (obliquity)
+					{
+						case 37:
+							index += 0 * 5;
+							break;
+						case 32:
+							index += 1 * 5;
+							break;
+						case 27:
+							index += 2 * 5;
+							break;
+						case 22:
+							index += 3 * 5;
+							break;
+						default:
+							throw new Exception("obliquity 参数不合法:" + obliquity);
+					}
+				}
+				startCol = index;
+			}
+			else//是1-5号组件
+			{
+				startCol = 2 + (componentId - 1) * 5;
+			}
 		}
 	}
 }
