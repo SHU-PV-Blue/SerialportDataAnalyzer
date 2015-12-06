@@ -59,7 +59,7 @@ namespace 数据查看器
 				wsh.Cells[row, col++] = dr["WindDirection"];
 				wsh.Cells[row, col++] = dr["Humidity(%RH)"];
 
-				string str = "[Hour] = " + dr["Hour"] + " and " + "[Minute] = " + dr["Minute"] + " and " + "[Second] = " + dr["Second"];
+				string str = "[Hour] = " + dr["Hour"] + " and " + "[Minute] = " + dr["Minute"];
 				DataRow[] result = ivDt.Select(str);
 				if (result.Length != 0)
 					wsh.Cells[row, col++] = result[0]["Component1Temperature"];
