@@ -11,6 +11,9 @@ using System.Windows.Forms;
 using System.Threading;
 using System.IO.Ports;
 using Microsoft.VisualBasic.Devices;
+using System.Diagnostics;
+
+using 数据查看器;
 
 namespace IVCurvometerTestTool
 {
@@ -21,6 +24,9 @@ namespace IVCurvometerTestTool
 		Thread _thread;
 		bool _ifSet = false;
 		List<Command> commands;
+		Process pro;
+
+
 		public MainForm()
 		{
 			InitializeComponent();
@@ -123,7 +129,7 @@ namespace IVCurvometerTestTool
 					break;
 			}
 			btnSwitchPort.Enabled = false;
-			lblTip.Text = "每天六点整时，程序将自动按下启动按钮";
+			lblTip.Text = "每天六点整时，程序将自动按下启动按钮\n收发结束后，将自动解析";
 			lblTip.ForeColor = Color.Green;
 		}
 
@@ -185,6 +191,27 @@ namespace IVCurvometerTestTool
 					}
 				}
 			}
+			StartAnaly(Application.StartupPath + @"\SendData\" + DateTime.Now.Year + "年" + DateTime.Now.Month + "月" + DateTime.Now.Day + "日.txt"
+				, Application.StartupPath + @"\ReciveData\" + DateTime.Now.Year + "年" + DateTime.Now.Month + "月" + DateTime.Now.Day + "日.txt");
+
+			while (pro != null && !pro.HasExited)
+				Thread.Sleep(1000);
+
+			
+			this.lbAnaly.Items.Add("正在导出为Excel...");
+			this.lbAnaly.SelectedIndex = this.lbAnaly.Items.Count - 1;
+			try
+			{
+				Exporter ept = new Exporter(DateTime.Now);
+				ept.Export();
+			}
+			catch(Exception ex)
+			{
+				MessageBox.Show(ex.Message, "异常");
+			}
+			this.lbAnaly.Items.Add("正在导出为Excel完成!");
+			this.lbAnaly.SelectedIndex = this.lbAnaly.Items.Count - 1;
+
 			btnStart.Enabled = true;
 			txtTimes.Enabled = true;
 		}
@@ -208,5 +235,34 @@ namespace IVCurvometerTestTool
 			}
 		}
 
+		private delegate void AddMessageHandler(string msg);
+		private void StartAnaly(string sendFile, string receiveFile)
+		{
+			//http://blog.csdn.net/ihadl/article/details/7709658
+			this.lbAnaly.Items.Clear();
+			pro = new Process();
+			pro.StartInfo.WorkingDirectory = Application.StartupPath;
+			pro.StartInfo.FileName = Application.StartupPath + @"\Analyzer.exe";
+			pro.StartInfo.Arguments = sendFile + " " + receiveFile;
+			pro.StartInfo.UseShellExecute = false;
+			pro.StartInfo.RedirectStandardInput = true;
+			pro.StartInfo.RedirectStandardOutput = true;
+			pro.StartInfo.RedirectStandardError = true;
+			pro.StartInfo.CreateNoWindow = true;
+			AddMessageHandler handler = delegate(string str)
+			{
+				this.lbAnaly.Items.Add(str);
+				this.lbAnaly.SelectedIndex = this.lbAnaly.Items.Count - 1;
+			};
+			pro.OutputDataReceived += new DataReceivedEventHandler(
+				delegate(object sender, DataReceivedEventArgs e)
+				{
+					if (!string.IsNullOrEmpty(e.Data))
+						this.lbAnaly.Invoke(handler, e.Data);
+				}
+				);
+			pro.Start();
+			pro.BeginOutputReadLine();
+		}
 	}
 }

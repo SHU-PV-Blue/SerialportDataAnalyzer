@@ -56,10 +56,13 @@
 			this.gbSendData = new System.Windows.Forms.GroupBox();
 			this.lbSendData = new System.Windows.Forms.ListBox();
 			this.tmrDateTime = new System.Windows.Forms.Timer(this.components);
+			this.gbAnaly = new System.Windows.Forms.GroupBox();
+			this.lbAnaly = new System.Windows.Forms.ListBox();
 			this.gbPortSet.SuspendLayout();
 			this.gbReceiveData.SuspendLayout();
 			this.gbControl.SuspendLayout();
 			this.gbSendData.SuspendLayout();
+			this.gbAnaly.SuspendLayout();
 			this.SuspendLayout();
 			// 
 			// gbPortSet
@@ -235,7 +238,7 @@
 			this.gbControl.Controls.Add(this.btnStart);
 			this.gbControl.Location = new System.Drawing.Point(12, 361);
 			this.gbControl.Name = "gbControl";
-			this.gbControl.Size = new System.Drawing.Size(747, 231);
+			this.gbControl.Size = new System.Drawing.Size(247, 231);
 			this.gbControl.TabIndex = 6;
 			this.gbControl.TabStop = false;
 			this.gbControl.Text = "控制";
@@ -244,7 +247,7 @@
 			// 
 			this.lblTip.AutoSize = true;
 			this.lblTip.ForeColor = System.Drawing.Color.Red;
-			this.lblTip.Location = new System.Drawing.Point(455, 108);
+			this.lblTip.Location = new System.Drawing.Point(6, 200);
 			this.lblTip.Name = "lblTip";
 			this.lblTip.Size = new System.Drawing.Size(221, 12);
 			this.lblTip.TabIndex = 8;
@@ -253,7 +256,7 @@
 			// lalDateTime
 			// 
 			this.lalDateTime.AutoSize = true;
-			this.lalDateTime.Location = new System.Drawing.Point(514, 65);
+			this.lalDateTime.Location = new System.Drawing.Point(65, 173);
 			this.lalDateTime.Name = "lalDateTime";
 			this.lalDateTime.Size = new System.Drawing.Size(53, 12);
 			this.lalDateTime.TabIndex = 7;
@@ -262,7 +265,7 @@
 			// label3
 			// 
 			this.label3.AutoSize = true;
-			this.label3.Location = new System.Drawing.Point(455, 65);
+			this.label3.Location = new System.Drawing.Point(6, 173);
 			this.label3.Name = "label3";
 			this.label3.Size = new System.Drawing.Size(53, 12);
 			this.label3.TabIndex = 6;
@@ -271,7 +274,7 @@
 			// lblTimesToDo
 			// 
 			this.lblTimesToDo.AutoSize = true;
-			this.lblTimesToDo.Location = new System.Drawing.Point(227, 108);
+			this.lblTimesToDo.Location = new System.Drawing.Point(98, 60);
 			this.lblTimesToDo.Name = "lblTimesToDo";
 			this.lblTimesToDo.Size = new System.Drawing.Size(11, 12);
 			this.lblTimesToDo.TabIndex = 5;
@@ -280,7 +283,7 @@
 			// label2
 			// 
 			this.label2.AutoSize = true;
-			this.label2.Location = new System.Drawing.Point(135, 108);
+			this.label2.Location = new System.Drawing.Point(6, 60);
 			this.label2.Name = "label2";
 			this.label2.Size = new System.Drawing.Size(77, 12);
 			this.label2.TabIndex = 4;
@@ -288,7 +291,7 @@
 			// 
 			// btnStop
 			// 
-			this.btnStop.Location = new System.Drawing.Point(227, 184);
+			this.btnStop.Location = new System.Drawing.Point(98, 136);
 			this.btnStop.Name = "btnStop";
 			this.btnStop.Size = new System.Drawing.Size(100, 23);
 			this.btnStop.TabIndex = 3;
@@ -299,7 +302,7 @@
 			// label1
 			// 
 			this.label1.AutoSize = true;
-			this.label1.Location = new System.Drawing.Point(135, 65);
+			this.label1.Location = new System.Drawing.Point(6, 17);
 			this.label1.Name = "label1";
 			this.label1.Size = new System.Drawing.Size(77, 12);
 			this.label1.TabIndex = 2;
@@ -307,7 +310,7 @@
 			// 
 			// txtTimes
 			// 
-			this.txtTimes.Location = new System.Drawing.Point(227, 62);
+			this.txtTimes.Location = new System.Drawing.Point(98, 14);
 			this.txtTimes.Name = "txtTimes";
 			this.txtTimes.Size = new System.Drawing.Size(100, 21);
 			this.txtTimes.TabIndex = 1;
@@ -315,7 +318,7 @@
 			// 
 			// btnStart
 			// 
-			this.btnStart.Location = new System.Drawing.Point(227, 145);
+			this.btnStart.Location = new System.Drawing.Point(98, 97);
 			this.btnStart.Name = "btnStart";
 			this.btnStart.Size = new System.Drawing.Size(100, 23);
 			this.btnStart.TabIndex = 0;
@@ -348,11 +351,31 @@
 			this.tmrDateTime.Interval = 1000;
 			this.tmrDateTime.Tick += new System.EventHandler(this.tmrDateTime_Tick);
 			// 
+			// gbAnaly
+			// 
+			this.gbAnaly.Controls.Add(this.lbAnaly);
+			this.gbAnaly.Location = new System.Drawing.Point(266, 362);
+			this.gbAnaly.Name = "gbAnaly";
+			this.gbAnaly.Size = new System.Drawing.Size(485, 230);
+			this.gbAnaly.TabIndex = 7;
+			this.gbAnaly.TabStop = false;
+			this.gbAnaly.Text = "解析并导出";
+			// 
+			// lbAnaly
+			// 
+			this.lbAnaly.FormattingEnabled = true;
+			this.lbAnaly.ItemHeight = 12;
+			this.lbAnaly.Location = new System.Drawing.Point(6, 20);
+			this.lbAnaly.Name = "lbAnaly";
+			this.lbAnaly.Size = new System.Drawing.Size(473, 208);
+			this.lbAnaly.TabIndex = 1;
+			// 
 			// MainForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.ClientSize = new System.Drawing.Size(769, 604);
+			this.Controls.Add(this.gbAnaly);
 			this.Controls.Add(this.gbSendData);
 			this.Controls.Add(this.gbControl);
 			this.Controls.Add(this.gbReceiveData);
@@ -370,6 +393,7 @@
 			this.gbControl.ResumeLayout(false);
 			this.gbControl.PerformLayout();
 			this.gbSendData.ResumeLayout(false);
+			this.gbAnaly.ResumeLayout(false);
 			this.ResumeLayout(false);
 
 		}
@@ -403,5 +427,7 @@
 		private System.Windows.Forms.Label lblTimesToDo;
 		private System.Windows.Forms.Label label2;
 		private System.Windows.Forms.Timer tmrDateTime;
+		private System.Windows.Forms.GroupBox gbAnaly;
+		private System.Windows.Forms.ListBox lbAnaly;
 	}
 }

@@ -27,7 +27,7 @@ namespace SerialportDataAnalyzer
 			else
 			{
 				sendFilePath = args[0];
-				receiveFilePath = args[0];
+				receiveFilePath = args[1];
 			}
 			
 
